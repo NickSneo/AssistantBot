@@ -3,7 +3,7 @@
 
 const { LuisRecognizer } = require('botbuilder-ai');
 
-class FlightBookingRecognizer {
+class AssistLuisService {
     constructor(config) {
         const luisIsConfigured = config && config.applicationId && config.endpointKey && config.endpoint;
         if (luisIsConfigured) {
@@ -65,4 +65,4 @@ class FlightBookingRecognizer {
     
 }
 
-module.exports.AssistLuisService = FlightBookingRecognizer;
+module.exports.AssistLuisService = AssistLuisService;
