@@ -11,6 +11,7 @@ const { BotFrameworkAdapter, ConversationState, UserState, MemoryStorage } = req
 // This bot's main dialog.
 const { AssistBot } = require('./bots/AssistBot');
 const { MainDialog } = require('./dialogs/MainDialog');
+// const { hrDialog } = require('./dialogs/hrDialog');
 const { AssistLuisService } = require('./dialogs/AssistLuisService');
 
 

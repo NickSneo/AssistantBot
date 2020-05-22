@@ -40,8 +40,8 @@ class AssistLuisService {
 
     getLeaveDays(result) {
         let leaveDays;
-        if (result.entities.$instance.leaveDays) {
-            leaveDays = result.entities.$instance.leaveDays[0].text;
+        if (result.entities.$instance.number ) {
+            leaveDays = result.entities.$instance.number[0].text;
         }
         
         return leaveDays;

@@ -3,9 +3,11 @@
 
 const { MessageFactory, InputHints } = require('botbuilder');
 const { LuisRecognizer } = require('botbuilder-ai');
-const { ComponentDialog, DialogSet, DialogTurnStatus, TextPrompt, WaterfallDialog } = require('botbuilder-dialogs');
+const { ComponentDialog, DialogSet, DialogTurnStatus, TextPrompt, WaterfallDialog,ChoiceFactory, ChoicePrompt } = require('botbuilder-dialogs');
 const { hrDialog, HR_DIALOG } = require('./hrDialog');
 
+const MAIN_DIALOG = "MainDialog";
+const CHOICE_PROMPT = 'CHOICE_PROMPT';
 
 const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
 
@@ -17,10 +19,12 @@ class MainDialog extends ComponentDialog {
         if (!luisRecognizer) throw new Error('[MainDialog]: Missing parameter \'luisRecognizer\' is required');
         this.luisRecognizer = luisRecognizer;
 
-        if (!hrDialog) throw new Error('[MainDialog]: Missing parameter \'bookingDialog\' is required');
+        // if (!hrDialog) throw new Error('[MainDialog]: Missing parameter \'bookingDialog\' is required');
 
         this.addDialog(new hrDialog());
+        this.addDialog(new ChoicePrompt(CHOICE_PROMPT))
         this.addDialog(new WaterfallDialog(MAIN_WATERFALL_DIALOG, [
+                this.introStep.bind(this),
                 this.actStep.bind(this)
             ]));
 
@@ -44,16 +48,22 @@ class MainDialog extends ComponentDialog {
         }
     }
 
-    
+    async introStep(stepContext) {
+        return await stepContext.prompt(CHOICE_PROMPT, {
+            prompt:'Here are a few suggestions you can try', 
+            choices: ChoiceFactory.toChoices(['HR', 'IT'])
+        });      
+        }
+
     async actStep(stepContext) {
         // const bookingDetails = {};
 
         if (this.luisRecognizer.isConfigured) {
-            
+        console.log("inside act if", stepContext.result.value)
         const luisResult = await this.luisRecognizer.executeLuisQuery(stepContext.context);
+        console.log(luisResult)
         switch (LuisRecognizer.topIntent(luisResult)) {
         case 'HR': {
-            await stepContext.sendActivity.MessageFactory.text(['Leave Mangement', 'Payroll', 'Recruitment', 'L&D', 'Survey','Holiday Calendar', ], 'Here are few suggestions which you can try.');
             return await stepContext.beginDialog(HR_DIALOG);
         }
 
@@ -71,6 +81,9 @@ class MainDialog extends ComponentDialog {
             break;
         }
 
+        case 'Help': {
+            return await stepContext.replaceDialog(this.initialDialogId, { restartMsg: 'What else can I do for you?' });
+        }
 
         default: {
             // Catch all for unhandled intents
