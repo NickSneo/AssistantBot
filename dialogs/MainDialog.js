@@ -4,7 +4,6 @@
 const { MessageFactory, InputHints } = require('botbuilder');
 const { LuisRecognizer } = require('botbuilder-ai');
 const { ComponentDialog, DialogSet, DialogTurnStatus, TextPrompt, WaterfallDialog,ChoiceFactory, ChoicePrompt } = require('botbuilder-dialogs');
-const { hrDialog, HR_DIALOG } = require('./hrDialog');
 
 const MAIN_DIALOG = "MainDialog";
 const CHOICE_PROMPT = 'CHOICE_PROMPT';
@@ -12,16 +11,16 @@ const CHOICE_PROMPT = 'CHOICE_PROMPT';
 const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
 
 class MainDialog extends ComponentDialog {
-    constructor(userState, conversationState, luisRecognizer) {
+    constructor(userState, conversationState, luisRecognizer, hrDialog) {
         super(MAIN_DIALOG);
+        
         this.userState = userState;
 
         if (!luisRecognizer) throw new Error('[MainDialog]: Missing parameter \'luisRecognizer\' is required');
         this.luisRecognizer = luisRecognizer;
-
         // if (!hrDialog) throw new Error('[MainDialog]: Missing parameter \'bookingDialog\' is required');
 
-        this.addDialog(new hrDialog());
+        this.addDialog(hrDialog);
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT))
         this.addDialog(new WaterfallDialog(MAIN_WATERFALL_DIALOG, [
                 this.introStep.bind(this),
@@ -64,7 +63,7 @@ class MainDialog extends ComponentDialog {
         console.log(luisResult)
         switch (LuisRecognizer.topIntent(luisResult)) {
         case 'HR': {
-            return await stepContext.beginDialog(HR_DIALOG);
+            return await stepContext.beginDialog('hrDialog');
         }
 
         case 'Sales': {
@@ -88,7 +87,7 @@ class MainDialog extends ComponentDialog {
         default: {
             // Catch all for unhandled intents
             const didntUnderstandMessageText = `Sorry, I didn't get that. Please try asking in a different way (intent was ${ LuisRecognizer.topIntent(luisResult) })`;
-            await stepContext.context.sendActivity(didntUnderstandMessageText, didntUnderstandMessageText, InputHints.IgnoringInput);
+            await stepContext.context.sendActivity(didntUnderstandMessageText, didntUnderstandMessageText);
         }
         }
     }

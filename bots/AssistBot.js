@@ -4,7 +4,7 @@
 const { ActivityHandler, MessageFactory } = require('botbuilder');
 
 const WELCOMED_USER = 'welcomedUserProperty';
-const EMP_ID = 'empId';
+const USER_PROFILE_PROPERTY = 'userProfile';
 
 class AssistBot extends ActivityHandler {
 
@@ -23,7 +23,8 @@ class AssistBot extends ActivityHandler {
         if (!dialog) throw new Error('[DialogBot]: Missing parameter. dialog is required');
 
         this.welcomedUserProperty = userState.createProperty(WELCOMED_USER);
-        this.empId = userState.createProperty(EMP_ID);
+        this.userProfileAccessor = userState.createProperty(USER_PROFILE_PROPERTY);
+        // this.empId = userState.createProperty(EMP_ID);
         this.conversationState = conversationState;
         this.userState = userState;
         this.dialog = dialog;
@@ -32,11 +33,13 @@ class AssistBot extends ActivityHandler {
 
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
+            const userProfile = await this.userProfileAccessor.get(context, {});
             const didBotWelcomedUser = await this.welcomedUserProperty.get(context, false);
             if (didBotWelcomedUser === false) {
                 // The channel should send the user name in the 'From' object
-                var input = context.activity.text;
-                await this.empId.set(context, input);
+                const input = context.activity.text;
+                userProfile.empId = input;
+                console.log(userProfile,this.userState)
                 await context.sendActivity(`Thnx!!! I have ur Employee Id as ${input}`);
                 await context.sendActivity("what can I do for you? You can type 'help' to start conversation.");
 

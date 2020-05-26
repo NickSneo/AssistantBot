@@ -11,7 +11,7 @@ const { BotFrameworkAdapter, ConversationState, UserState, MemoryStorage } = req
 // This bot's main dialog.
 const { AssistBot } = require('./bots/AssistBot');
 const { MainDialog } = require('./dialogs/MainDialog');
-// const { hrDialog } = require('./dialogs/hrDialog');
+const { hrDialog } = require('./dialogs/hrDialog');
 const { AssistLuisService } = require('./dialogs/AssistLuisService');
 
 
@@ -70,7 +70,8 @@ const luisConfig = { applicationId: LuisAppId, endpointKey: LuisAPIKey, endpoint
 const luisRecognizer = new AssistLuisService(luisConfig);
 
 // Create the main dialog.
-const mainDialog = new MainDialog(userState, conversationState, luisRecognizer);
+const HRDialog = new hrDialog(userState,conversationState, luisRecognizer)
+const mainDialog = new MainDialog(userState, conversationState, luisRecognizer,HRDialog);
 const assistBot = new AssistBot(conversationState, userState, mainDialog);
 
 

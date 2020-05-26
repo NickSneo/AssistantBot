@@ -1,0 +1,19 @@
+{
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+    "version": "1.0",
+    "body": [
+      {
+        "type": "TextBlock",
+        "wrap": true,
+        "text": "Cards can have action sets in the middle of their body."
+      }      
+    ],
+    "actions": [
+      {
+        "type": "Action.OpenUrl",
+        "title": "OpenUrl",
+        "url": "https://drive.google.com/file/d/1_0O5qk6z6oTfKEeQ_SvPAz3EQCcL3bR_/view"
+      }
+    ]
+  }
