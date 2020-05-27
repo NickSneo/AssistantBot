@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { MessageFactory, InputHints } = require('botbuilder');
 const { LuisRecognizer } = require('botbuilder-ai');
 const { ComponentDialog, DialogSet, DialogTurnStatus, TextPrompt, WaterfallDialog,ChoiceFactory, ChoicePrompt } = require('botbuilder-dialogs');
 
@@ -11,16 +10,17 @@ const CHOICE_PROMPT = 'CHOICE_PROMPT';
 const MAIN_WATERFALL_DIALOG = 'mainWaterfallDialog';
 
 class MainDialog extends ComponentDialog {
-    constructor(userState, conversationState, luisRecognizer, hrDialog) {
+    constructor(userState, conversationState, luisRecognizer, hrDialog, adminDialog) {
         super(MAIN_DIALOG);
         
         this.userState = userState;
+        this.conversationState = conversationState;
 
         if (!luisRecognizer) throw new Error('[MainDialog]: Missing parameter \'luisRecognizer\' is required');
         this.luisRecognizer = luisRecognizer;
-        // if (!hrDialog) throw new Error('[MainDialog]: Missing parameter \'bookingDialog\' is required');
 
         this.addDialog(hrDialog);
+        this.addDialog(adminDialog);
         this.addDialog(new ChoicePrompt(CHOICE_PROMPT))
         this.addDialog(new WaterfallDialog(MAIN_WATERFALL_DIALOG, [
                 this.introStep.bind(this),
@@ -50,12 +50,11 @@ class MainDialog extends ComponentDialog {
     async introStep(stepContext) {
         return await stepContext.prompt(CHOICE_PROMPT, {
             prompt:'Here are a few suggestions you can try', 
-            choices: ChoiceFactory.toChoices(['HR', 'IT'])
+            choices: ChoiceFactory.toChoices(['HR', 'IT', 'ADMIN'])
         });      
         }
 
     async actStep(stepContext) {
-        // const bookingDetails = {};
 
         if (this.luisRecognizer.isConfigured) {
         console.log("inside act if", stepContext.result.value)
@@ -66,11 +65,9 @@ class MainDialog extends ComponentDialog {
             return await stepContext.beginDialog('hrDialog');
         }
 
-        case 'Sales': {
-        
-            const salesText = 'TODO:';
-            await stepContext.context.sendActivity(salesText);
-            break;
+        case 'Admin': {
+            return await stepContext.beginDialog('adminDialog');
+            
         }
 
         case 'IT': {
